@@ -6,7 +6,7 @@
 
 # Import helper objects that provide the logical operations
 # discussed in class.
-from production import IF, AND, OR, NOT, THEN, forward_chain
+from production import IF, AND, OR, NOT, THEN, DELETE, forward_chain
 
 ## Section 1: Forward chaining ##
 
@@ -17,7 +17,7 @@ from production import IF, AND, OR, NOT, THEN, forward_chain
 #    2. the consequent
 #    3. both
 
-ANSWER_1 = 'your answer here'
+ANSWER_1 = '2'
 
 # A rule-based system about Monty Python's "Dead Parrot" sketch
 # uses the following rules:
@@ -37,10 +37,10 @@ ANSWER_1 = 'your answer here'
 
 # Will this system produce the datum 'Polly is pining for the
 # fjords'?  Answer 'yes' or 'no'.
-ANSWER_2 = 'your answer here'
+ANSWER_2 = 'no'
 
 # Which rule contains a programming error? Answer '1' or '2'.
-ANSWER_3 = 'your answer here'
+ANSWER_3 = '2'
 
 # If you're uncertain of these answers, look in tests.py for an
 # explanation.
@@ -69,11 +69,11 @@ ANSWER_3 = 'your answer here'
 # what is asked.  After we start the system running, which rule
 # fires first?
 
-ANSWER_4 = 'your answer here'
+ANSWER_4 = '1'
 
 # Which rule fires second?
 
-ANSWER_5 = 'your answer here'
+ANSWER_5 = '0'
 
 
 # Problem 1.3.1: Poker hands
@@ -90,7 +90,7 @@ poker_data = ( 'two-pair beats pair',
 # which poker hands beat which, transitively. For example, it
 # should be able to deduce that a three-of-a-kind beats a pair,
 # because a three-of-a-kind beats two-pair, which beats a pair.
-transitive_rule = IF( AND(), THEN() )
+transitive_rule = IF( AND('(?y) beats (?x)', '(?z) beats (?y)'), THEN('(?z) beats (?x)') )
 
 # You can test your rule like this:
 # print forward_chain([transitive_rule], poker_data)
@@ -114,7 +114,40 @@ TEST_RESULTS_TRANS2 = forward_chain([transitive_rule],
 
 # Then, put them together into a list in order, and call it
 # family_rules.
-family_rules = [ ]                    # fill me in
+sibling_rule = IF (AND ('parent (?x) (?y)', 'parent (?x) (?z)'),
+                  THEN ('sibling (?y) (?z)'),
+                  DELETE ('sibling (?y) (?y)', 'sibling (?z) (?z)'))
+
+brother_rule = IF (AND ('sibling (?x) (?y)', 'male (?x)'),
+                  THEN ('brother (?x) (?y)'))
+sister_rule = IF (AND ('sibling (?x) (?y)', 'female (?x)'),
+                  THEN ('sister (?x) (?y)'))
+father_rule = IF (AND ('parent (?x) (?y)', 'male (?x)'),
+                  THEN ('father (?x) (?y)'))
+mother_rule = IF (AND ('parent (?x) (?y)', 'female (?x)'),
+                  THEN ('mother (?x) (?y)'))
+son_rule = IF (AND ('parent (?x) (?y)', 'male (?y)'),
+                  THEN ('son (?y) (?x)'))
+daughter_rule = IF (AND ('parent (?x) (?y)', 'female (?y)'),
+                  THEN ('daughter (?y) (?x)'))
+cousin_rule = IF (AND ('parent (?x) (?a)', 'parent (?y) (?b)', 'sibling (?x) (?y)'),
+                  THEN ('cousin (?a) (?b)'))
+grandparent_rule = IF (AND ('parent (?x) (?y)', 'parent (?y) (?z)'),
+                  THEN ('grandparent (?x) (?z)'))
+grandchild_rule = IF (AND ('parent (?x) (?y)', 'parent (?y) (?z)'),
+                  THEN ('grandchild (?z) (?x)'))
+
+
+family_rules = [sibling_rule, 
+                brother_rule, 
+                sister_rule, 
+                father_rule, 
+                mother_rule, 
+                son_rule, 
+                daughter_rule, 
+                cousin_rule, 
+                grandparent_rule, 
+                grandchild_rule] 
 
 # Some examples to try it on:
 # Note: These are used for testing, so DO NOT CHANGE
@@ -131,10 +164,9 @@ simpsons_data = ("male bart",
                  "parent homer lisa",
                  "parent homer maggie",
                  "parent abe homer")
-TEST_RESULTS_6 = forward_chain(family_rules,
-                               simpsons_data,verbose=False)
+TEST_RESULTS_6 = forward_chain(family_rules, simpsons_data,verbose=False)
 # You can test your results by uncommenting this line:
-# print forward_chain(family_rules, simpsons_data, verbose=True)
+print forward_chain(family_rules, simpsons_data, verbose=True)
 
 black_data = ("male sirius",
               "male regulus",
